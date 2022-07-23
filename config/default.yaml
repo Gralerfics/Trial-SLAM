@@ -1,0 +1,12 @@
+%YAML: 1.0
+
+# Camera Intrinsics
+camera.fx: 816.011676
+camera.fy: 811.145514
+camera.cx: 349.590470
+camera.cy: 230.759915
+camera.k1: 0.040870
+camera.k2: 0.181320
+camera.k3: -0.003507
+camera.p1: 0.006012
+camera.p2: 0.000000
