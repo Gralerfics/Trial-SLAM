@@ -21,6 +21,8 @@ class VisualOdometry {
 
         void execute();
 
+        void stop();
+
     private:
         Frontend::Ptr _frontend = nullptr;
 };

@@ -3,26 +3,26 @@
 TRIAL_SLAM_NAMESPACE_BEGIN
 
 void Map::addKeyFrame(Frame::Ptr frame) {
-    if (_keyframes.find(frame -> getKeyFrameId()) == _keyframes.end()) {
+    // if (_keyframes.find(frame -> getKeyFrameId()) == _keyframes.end()) {
         _keyframes.insert(std::make_pair(frame -> getKeyFrameId(), frame));
         _active_keyframes.insert(std::make_pair(frame -> getKeyFrameId(), frame));
-    } else {
-        _keyframes[frame -> getKeyFrameId()] = frame;
-        _active_keyframes[frame -> getKeyFrameId()] = frame;
-    }
+    // } else {
+    //     _keyframes[frame -> getKeyFrameId()] = frame;
+    //     _active_keyframes[frame -> getKeyFrameId()] = frame;
+    // }
     
     if (_active_keyframes.size() > _num_active_keyframes)
         filterActiveKeyFrame(frame, 0.2);
 }
 
 void Map::addLandmark(Landmark::Ptr landmark) {
-    if (_landmarks.find(landmark -> getId()) == _landmarks.end()) {
+    // if (_landmarks.find(landmark -> getId()) == _landmarks.end()) {
         _landmarks.insert(std::make_pair(landmark -> getId(), landmark));
         _active_landmarks.insert(std::make_pair(landmark -> getId(), landmark));
-    } else {
-        _landmarks[landmark -> getId()] = landmark;
-        _active_landmarks[landmark -> getId()] = landmark;
-    }
+    // } else {
+    //     _landmarks[landmark -> getId()] = landmark;
+    //     _active_landmarks[landmark -> getId()] = landmark;
+    // }
 }
 
 void Map::filterActiveLandmarks() {

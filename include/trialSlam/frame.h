@@ -44,10 +44,6 @@ class Frame {
             _T_cw = T_cw;
         }
 
-        void setImg(const cv::Mat& img) {
-            _img = img;
-        }
-
         bool markAsKeyFrame();
 
         static Frame::Ptr Create();
@@ -56,11 +52,13 @@ class Frame {
         std::vector<std::shared_ptr<Feature>> _features;
         unsigned long _id, _keyframe_id;
         bool _is_keyframe;
-        cv::Mat _img;
         SE3 _T_cw;
         std::mutex _mutex;                                      // for _T_cw.
 
         static unsigned long __id, __keyframe_id;
+
+    public:
+        cv::Mat _img, _img_raw;
 };
 
 TRIAL_SLAM_NAMESPACE_END

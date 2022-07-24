@@ -23,13 +23,15 @@ class Frontend {
 
         Frontend() {}
 
+        bool initialize();
+
+        void stop();
+
+        // void reset();
+
         bool addFrame(Frame::Ptr frame);
 
         // bool addCurAsKeyFrame();
-
-        // bool initialize();
-
-        // void reset();
 
         // void track();
 
