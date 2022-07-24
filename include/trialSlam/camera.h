@@ -20,17 +20,17 @@ class Camera {
             _k1(k1), _k2(k2), _k3(k3), _p1(p1), _p2(p2),
             _camera_index(camera_index) {}
 
-        Vec3 world2camera(const Vec3& p_w, const SE3& pose) const;
+        Vec3 world2camera(const Vec3& p_w, const SE3& T_cw) const;
 
-        Vec3 camera2world(const Vec3& p_c, const SE3& pose) const;
+        Vec3 camera2world(const Vec3& p_c, const SE3& T_cw) const;
 
         Vec2 camera2pixel(const Vec3& p_c) const;
 
         Vec3 pixel2camera(const Vec2& p_uv, double depth = 1) const;
 
-        Vec2 world2pixel(const Vec3& p_w, const SE3& pose) const;
+        Vec2 world2pixel(const Vec3& p_w, const SE3& T_cw) const;
 
-        Vec3 pixel2world(const Vec2& p_uv, const SE3& pose, double depth = 1) const;
+        Vec3 pixel2world(const Vec2& p_uv, const SE3& T_cw, double depth = 1) const;
 
         bool open();
 
