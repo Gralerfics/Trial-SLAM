@@ -46,11 +46,15 @@ class Frontend {
         void setMap(Map::Ptr map) { _map = map; }
 
     private:
-        FrontendStatus _status = FrontendStatus::INIT_FIRST;
-
         Camera::Ptr _camera = nullptr;
         Frame::Ptr _cur_frame = nullptr, _last_frame = nullptr;
         Map::Ptr _map = nullptr;
+        FrontendStatus _status = FrontendStatus::INIT_FIRST;
+
+    public:
+        int _num_features = 150;
+        int _num_features_for_init = 80;
+        int _num_features_for_keyframe = 60;
 };
 
 TRIAL_SLAM_NAMESPACE_END

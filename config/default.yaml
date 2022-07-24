@@ -16,3 +16,6 @@ cam0.p2: 0.000000
 featnum: 150
 featnum.init: 80
 featnum.keyframe: 60
+
+# Frame
+framenum.active: 6

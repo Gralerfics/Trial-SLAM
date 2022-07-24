@@ -15,7 +15,6 @@
 #include <list>
 #include <vector>
 #include <unordered_map>
-#include <unordered_set>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

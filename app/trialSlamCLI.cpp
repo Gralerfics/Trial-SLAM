@@ -22,17 +22,21 @@ int main(int argc, char **argv) {
         trialSlam::Config::get<double>("cam0.k2"),
         trialSlam::Config::get<double>("cam0.k3"),
         trialSlam::Config::get<double>("cam0.p1"),
-        trialSlam::Config::get<double>("cam0.p2")
+        trialSlam::Config::get<double>("cam0.p2"),
+        trialSlam::Config::get<double>("cam0.index")
     ));
-    camera -> setCameraIndex(0);
 
     // Map
     std::shared_ptr<trialSlam::Map> map(new trialSlam::Map());
+    map -> _num_active_keyframes = trialSlam::Config::get<int>("framenum.active");
 
     // Frontend
     std::shared_ptr<trialSlam::Frontend> frontend(new trialSlam::Frontend());
     frontend -> setCamera(camera);
     frontend -> setMap(map);
+    frontend -> _num_features = trialSlam::Config::get<int>("featnum");
+    frontend -> _num_features_for_init = trialSlam::Config::get<int>("featnum.init");
+    frontend -> _num_features_for_keyframe = trialSlam::Config::get<int>("featnum.keyframe");
 
     // VisualOdometry
     std::shared_ptr<trialSlam::VisualOdometry> vo(new trialSlam::VisualOdometry());
