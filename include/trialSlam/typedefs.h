@@ -2,9 +2,9 @@
 #ifndef TRIALSLAM_TYPEDEFS_H_
 #define TRIALSLAM_TYPEDEFS_H_
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatXX;
-typedef Eigen::Matrix<double, 3, 3> Mat33;
-typedef Eigen::Matrix<double, 4, 4> Mat44;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatXxX;
+typedef Eigen::Matrix<double, 3, 3> Mat3x3;
+typedef Eigen::Matrix<double, 4, 4> Mat4x4;
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VecX;
 typedef Eigen::Matrix<double, 4, 1> Vec4;

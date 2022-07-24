@@ -3,3 +3,4 @@ bin/
 lib/
 build/
 config/ost.txt
+.vscode/settings.json

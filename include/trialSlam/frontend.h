@@ -1,0 +1,58 @@
+#pragma once
+#ifndef _TRIALSLAM_FRONTEND_H_
+#define _TRIALSLAM_FRONTEND_H_
+
+#include "trialSlam/common.h"
+#include "trialSlam/camera.h"
+#include "trialSlam/frame.h"
+#include "trialSlam/map.h"
+
+TRIAL_SLAM_NAMESPACE_BEGIN
+
+enum class FrontendStatus {
+    INIT_FIRST,
+    INIT_SECOND,
+    TRACKING,
+    LOST
+};
+
+class Frontend {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        typedef std::shared_ptr<Frontend> Ptr;
+
+        Frontend() {}
+
+        bool addFrame(Frame::Ptr frame);
+
+        // bool addCurAsKeyFrame();
+
+        // bool initialize();
+
+        // void reset();
+
+        // void track();
+
+        // void extractFeatures();
+
+        // void trackFeatures();
+
+        // void estimateCurPose();
+
+        Camera::Ptr getCamera() const { return _camera; }
+
+        void setCamera(Camera::Ptr camera) { _camera = camera; }
+
+        void setMap(Map::Ptr map) { _map = map; }
+
+    private:
+        FrontendStatus _status = FrontendStatus::INIT_FIRST;
+
+        Camera::Ptr _camera = nullptr;
+        Frame::Ptr _cur_frame = nullptr, _last_frame = nullptr;
+        Map::Ptr _map = nullptr;
+};
+
+TRIAL_SLAM_NAMESPACE_END
+
+#endif

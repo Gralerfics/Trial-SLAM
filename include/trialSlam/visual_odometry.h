@@ -3,6 +3,8 @@
 #define _TRIALSLAM_VISUAL_ODOMETRY_H_
 
 #include "trialSlam/common.h"
+#include "trialSlam/camera.h"
+#include "trialSlam/frontend.h"
 
 TRIAL_SLAM_NAMESPACE_BEGIN
 
@@ -13,8 +15,14 @@ class VisualOdometry {
 
         VisualOdometry() {}
 
-    private:
+        void setFrontend(Frontend::Ptr frontend) { _frontend = frontend; }
 
+        bool initialize();
+
+        void execute();
+
+    private:
+        Frontend::Ptr _frontend = nullptr;
 };
 
 TRIAL_SLAM_NAMESPACE_END
