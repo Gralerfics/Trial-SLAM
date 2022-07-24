@@ -28,26 +28,26 @@ class Map {
 
             std::unordered_set<std::shared_ptr<Frame>> getFrames() {
                 std::unique_lock<std::mutex> ulck(_data_mutex);
-                return _frames;
+                return _keyframes;
             }
 
             std::unordered_set<std::shared_ptr<Frame>> getActiveFrames() {
                 std::unique_lock<std::mutex> ulck(_data_mutex);
-                return _active_frames;
+                return _active_keyframes;
             }
 
         // Actions
-            void addFrame(std::shared_ptr<Frame> frame);
+            bool addKeyFrame(std::shared_ptr<Frame> keyframe);
 
-            void addLandmark(std::shared_ptr<Landmark> landmark);
+            bool addLandmark(std::shared_ptr<Landmark> landmark);
 
-            void popActiveFrame();
+            void popActiveKeyFrame(std::shared_ptr<Frame> ref_keyframe);
 
     private:
-        int num_active_frames = 6;
+        const int _num_active_keyframes = 6;
 
         std::unordered_set<std::shared_ptr<Landmark>> _landmarks, _active_landmarks;
-        std::unordered_set<std::shared_ptr<Frame>> _frames, _active_frames;
+        std::unordered_set<std::shared_ptr<Frame>> _keyframes, _active_keyframes;
         std::mutex _data_mutex;
 };
 

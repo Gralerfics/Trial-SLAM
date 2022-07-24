@@ -10,6 +10,8 @@
 
 TRIAL_SLAM_NAMESPACE_BEGIN
 
+enum class FrontendStatus { INITA, INITB, TRACKING, LOST };
+
 class Frontend {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
@@ -27,8 +29,11 @@ class Frontend {
             void setDashboard(std::shared_ptr<Dashboard> dashboard) { _dashboard = dashboard; }
 
         // Actions
+            bool addFrame(std::shared_ptr<Frame> frame);
 
     private:
+        FrontendStatus _status = FrontendStatus::INITA;
+
         std::shared_ptr<MonoCamera> _camera = nullptr;
         std::shared_ptr<Backend> _backend = nullptr;
         std::shared_ptr<Map> _map = nullptr;

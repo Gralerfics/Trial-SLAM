@@ -26,8 +26,24 @@ class Landmark {
                 _position = position;
             }
 
+            int getActiveObservatorFrameNum() {
+                std::unique_lock<std::mutex> ulck(_data_mutex);
+                return _num_active_observator_frame;
+            }
+
+            void addActiveObservatorFrameNum() {
+                std::unique_lock<std::mutex> ulck(_data_mutex);
+                _num_active_observator_frame ++;
+            }
+
+            void decActiveObservatorFrameNum() {
+                std::unique_lock<std::mutex> ulck(_data_mutex);
+                _num_active_observator_frame --;
+            }
+
     private:
         Vec3 _position = Vec3::Zero();
+        int _num_active_observator_frame = 0;
         std::mutex _data_mutex;
 };
 

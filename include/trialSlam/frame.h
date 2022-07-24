@@ -3,6 +3,7 @@
 #define TRIALSLAM_FRAME_H_
 
 #include "trialSlam/common.h"
+#include "trialSlam/landmark.h"
 
 TRIAL_SLAM_NAMESPACE_BEGIN
 
@@ -32,10 +33,20 @@ class Frame {
                 _pose = pose;
             }
 
+            void getTimeStamp() const {
+                return _time_stamp;
+            }
+
+        // Actions
+            void addLandmark(std::shared_ptr<Landmark> landmark);
+
+            void removeFromActiveKeyFrame();
+
     private:
         SE3 _pose;
         cv::Mat _img;
         unsigned long _time_stamp;
+        std::list<std::shared_ptr<Landmark>> _landmarks;
         std::mutex _data_mutex;
 };
 

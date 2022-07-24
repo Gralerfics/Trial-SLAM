@@ -37,7 +37,7 @@ void MonoVisualOdometry::execute() {
         cv::imshow("Camera Test", _capture_mat);
         cv::waitKey(1);
 
-
+        
     }
     stop();
 }
