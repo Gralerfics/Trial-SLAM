@@ -1,4 +1,5 @@
 add_library(TrialSLAM SHARED
+    config.cpp
     visual_odometry.cpp
 )
 

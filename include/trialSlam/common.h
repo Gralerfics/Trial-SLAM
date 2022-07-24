@@ -25,6 +25,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <glog/logging.h>
+
 TRIAL_SLAM_NAMESPACE_BEGIN
 
 #include "constants.h"
