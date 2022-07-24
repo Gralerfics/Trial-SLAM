@@ -2,5 +2,4 @@ Trial-SLAM.code-workspace
 bin/
 lib/
 build/
-.vscode/
 config/ost.txt
