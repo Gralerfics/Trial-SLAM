@@ -1,0 +1,7 @@
+#include "trialSlam/backend.h"
+
+TRIAL_SLAM_NAMESPACE_BEGIN
+
+
+
+TRIAL_SLAM_NAMESPACE_END
