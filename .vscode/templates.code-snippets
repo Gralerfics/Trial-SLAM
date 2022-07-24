@@ -15,6 +15,7 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
+	
 	"New .h File": {
 		"prefix": "hnew",
 		"body": [
@@ -50,5 +51,18 @@
 			"};"
 		],
 		"description": "New class."
+	},
+	"New Test File": {
+		"prefix": "testnew",
+		"body": [
+			"#include <gtest/gtest.h>\n",
+			"#include \"trialSlam/common.h\"\n",
+			"TEST(TrialSlamTestSuite, ${1:TEST_NAME}) {\n\t$0\n}\n",
+			"int main(int argc, char **argv) {",
+			"\t::testing::InitGoogleTest(&argc, argv);",
+			"\treturn RUN_ALL_TESTS();",
+			"}\n"
+		],
+		"description": "New gtest .cpp file."
 	}
 }
