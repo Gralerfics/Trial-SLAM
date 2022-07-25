@@ -54,7 +54,7 @@ void Map::filterActiveKeyFrame(Frame::Ptr ref_frame, double dist_thresold) {
     }
 
     Frame::Ptr rm_frame = _keyframes.at(min_dist < dist_thresold ? min_index : max_index);
-    for (Feature::Ptr feature : rm_frame -> getFeatures()) {
+    for (Feature::Ptr feature : rm_frame -> getFeaturesRef()) {
         if (feature -> getLandmark().lock()) {
             feature -> getLandmark().lock() -> removeObservedBy(feature);
         }

@@ -26,7 +26,7 @@ class Frame {
             return _keyframe_id;
         }
 
-        std::vector<std::shared_ptr<Feature>> getFeatures() {
+        std::vector<std::shared_ptr<Feature>>& getFeaturesRef() {
             return _features;
         }
 

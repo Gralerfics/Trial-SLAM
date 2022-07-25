@@ -10,8 +10,8 @@
 TRIAL_SLAM_NAMESPACE_BEGIN
 
 enum class FrontendStatus {
-    INIT_FIRST,
-    INIT_SECOND,
+    INIT_TRACK_FIRST,
+    INIT_TRACK_SECOND,
     TRACKING,
     LOST
 };
@@ -27,17 +27,23 @@ class Frontend {
 
         void stop();
 
-        // void reset();
-
         bool addFrame(Frame::Ptr frame);
 
+        void initTrackFirst();
+
+        void initTrackSecond();
+
+        void track();
+
+        void reset();
+
+        int extractFrameFeatures(Frame::Ptr cur_frame);
+
+        int trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_frame);
+
+        bool buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second);
+
         // bool addCurAsKeyFrame();
-
-        // void track();
-
-        // void extractFeatures();
-
-        // void trackFeatures();
 
         // void estimateCurPose();
 
@@ -50,10 +56,14 @@ class Frontend {
     private:
         Camera::Ptr _camera = nullptr;
         Frame::Ptr _cur_frame = nullptr, _last_frame = nullptr;
+        Frame::Ptr _init_frame = nullptr;
         Map::Ptr _map = nullptr;
-        FrontendStatus _status = FrontendStatus::INIT_FIRST;
+        FrontendStatus _status = FrontendStatus::INIT_TRACK_FIRST;
 
     public:
+        cv::Ptr<cv::GFTTDetector> _features_detector;
+        double _fd_quality_level = 0.01;
+        double _fd_min_distance = 20;
         int _num_features = 150;
         int _num_features_for_init = 80;
         int _num_features_for_keyframe = 60;

@@ -34,6 +34,8 @@ int main(int argc, char **argv) {
     std::shared_ptr<trialSlam::Frontend> frontend(new trialSlam::Frontend());
     frontend -> setCamera(camera);
     frontend -> setMap(map);
+    frontend -> _fd_quality_level = trialSlam::Config::get<double>("detector.qualitylevel");
+    frontend -> _fd_min_distance = trialSlam::Config::get<double>("detector.mindistance");
     frontend -> _num_features = trialSlam::Config::get<int>("featnum");
     frontend -> _num_features_for_init = trialSlam::Config::get<int>("featnum.init");
     frontend -> _num_features_for_keyframe = trialSlam::Config::get<int>("featnum.keyframe");

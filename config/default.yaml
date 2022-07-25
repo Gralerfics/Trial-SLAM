@@ -13,9 +13,12 @@ cam0.p1: 0.006012
 cam0.p2: 0.000000
 
 # Feature Extraction
-featnum: 150
-featnum.init: 80
-featnum.keyframe: 60
+detector: gftt
+detector.qualitylevel: 0.01
+detector.mindistance: 10
+featnum: 200
+featnum.init: 100
+featnum.keyframe: 75
 
 # Frame
 framenum.active: 6
