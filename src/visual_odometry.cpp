@@ -16,22 +16,18 @@ bool VisualOdometry::initialize() {
 }
 
 void VisualOdometry::execute() {
-    // cv::namedWindow("Test", cv::WINDOW_AUTOSIZE);
-
     cv::Mat shot;
     while (_frontend -> getCamera() -> capture(shot)) {
         Frame::Ptr frame = Frame::Create();
 
         shot.copyTo(frame -> _img_raw);
         cv::cvtColor(shot, frame -> _img, cv::COLOR_RGB2GRAY);
-
-        // cv::imshow("Test", frame -> _img_raw);
         
         if (!_frontend -> addFrame(frame)) break;
         
         if (cv::waitKey(1) == 27) break;
     }
-    
+
     stop();
 }
 

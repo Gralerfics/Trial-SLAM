@@ -11,6 +11,8 @@ bool Frontend::initialize() {
 
     if (!_camera -> open()) return false;
 
+    _dashboard -> initialize();
+
     return true;
 }
 
@@ -19,6 +21,7 @@ void Frontend::stop() {
         cv::destroyWindow("Camera");
 
     _camera -> close();
+    _dashboard -> stop();
 }
 
 bool Frontend::addFrame(Frame::Ptr frame) {
@@ -66,30 +69,33 @@ void Frontend::initTrackSecond() {
     if (_num_effective < _num_features_for_init) return;
 
     // Temporary Dashboard
-        cv::Mat _tmp;
-        std::vector<cv::DMatch> _matches;
-        std::vector<cv::KeyPoint> _pts_1, _pts_2;
-        int _match_cnt = 0;
-        for (int i = 0; i < _init_frame -> getFeaturesRef().size(); i ++) {
-            if (_cur_frame -> getFeaturesRef()[i] != nullptr) {
-                _matches.push_back(cv::DMatch(_match_cnt, _match_cnt, 0));
-                _pts_1.push_back(_init_frame -> getFeaturesRef()[i] -> getKeyPoint());
-                _pts_2.push_back(_cur_frame -> getFeaturesRef()[i] -> getKeyPoint());
-                _match_cnt ++;
-            }
-        }
-        cv::drawMatches(
-            _init_frame -> _img_raw, _pts_1,
-            _cur_frame -> _img_raw, _pts_2,
-            _matches, _tmp
-        );
-        cv::imshow("Initial Matches", _tmp);
-        cv::waitKey(0);
-        cv::destroyWindow("Initial Matches");
+        // cv::Mat _tmp;
+        // std::vector<cv::DMatch> _matches;
+        // std::vector<cv::KeyPoint> _pts_1, _pts_2;
+        // int _match_cnt = 0;
+        // for (int i = 0; i < _init_frame -> getFeaturesRef().size(); i ++) {
+        //     if (_cur_frame -> getFeaturesRef()[i] != nullptr) {
+        //         _matches.push_back(cv::DMatch(_match_cnt, _match_cnt, 0));
+        //         _pts_1.push_back(_init_frame -> getFeaturesRef()[i] -> getKeyPoint());
+        //         _pts_2.push_back(_cur_frame -> getFeaturesRef()[i] -> getKeyPoint());
+        //         _match_cnt ++;
+        //     }
+        // }
+        // cv::drawMatches(
+        //     _init_frame -> _img_raw, _pts_1,
+        //     _cur_frame -> _img_raw, _pts_2,
+        //     _matches, _tmp
+        // );
+        // cv::imshow("Initial Matches", _tmp);
+        // cv::waitKey(0);
+        // cv::destroyWindow("Initial Matches");
 
     if (buildMapByInit(_init_frame, _cur_frame)) {
         _status = FrontendStatus::TRACKING;
-        // TODO: Dashboard
+        if (_dashboard) {
+            _dashboard -> setCurrentFrame(_cur_frame);
+            _dashboard -> update();
+        }
     } else {
         _status = FrontendStatus::INIT_TRACK_FIRST;
     }
@@ -97,6 +103,9 @@ void Frontend::initTrackSecond() {
 
 void Frontend::track() {
     
+
+    if (_dashboard)
+        _dashboard -> setCurrentFrame(_cur_frame);
 }
 
 void Frontend::reset() {

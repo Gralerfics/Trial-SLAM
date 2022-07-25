@@ -1,6 +1,7 @@
 add_library(TrialSLAM SHARED
     camera.cpp
     config.cpp
+    dashboard.cpp
     feature.cpp
     frame.cpp
     frontend.cpp

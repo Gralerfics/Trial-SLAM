@@ -5,6 +5,7 @@
 #include "trialSlam/common.h"
 #include "trialSlam/camera.h"
 #include "trialSlam/frame.h"
+#include "trialSlam/dashboard.h"
 #include "trialSlam/map.h"
 
 TRIAL_SLAM_NAMESPACE_BEGIN
@@ -51,12 +52,15 @@ class Frontend {
 
         void setCamera(Camera::Ptr camera) { _camera = camera; }
 
+        void setDashboard(Dashboard::Ptr dashboard) { _dashboard = dashboard; }
+
         void setMap(Map::Ptr map) { _map = map; }
 
     private:
         Camera::Ptr _camera = nullptr;
         Frame::Ptr _cur_frame = nullptr, _last_frame = nullptr;
         Frame::Ptr _init_frame = nullptr;
+        Dashboard::Ptr _dashboard = nullptr;
         Map::Ptr _map = nullptr;
         FrontendStatus _status = FrontendStatus::INIT_TRACK_FIRST;
 

@@ -23,16 +23,24 @@ int main(int argc, char **argv) {
         trialSlam::Config::get<double>("cam0.k3"),
         trialSlam::Config::get<double>("cam0.p1"),
         trialSlam::Config::get<double>("cam0.p2"),
-        trialSlam::Config::get<double>("cam0.index")
+        trialSlam::Config::get<double>("cam0.index"),
+        trialSlam::Config::get<double>("cam0.width"),
+        trialSlam::Config::get<double>("cam0.height")
     ));
 
     // Map
     std::shared_ptr<trialSlam::Map> map(new trialSlam::Map());
     map -> _num_active_keyframes = trialSlam::Config::get<int>("framenum.active");
 
+    // Dashboard
+    std::shared_ptr<trialSlam::Dashboard> dashboard(new trialSlam::Dashboard());
+    dashboard -> setCamera(camera);
+    dashboard -> setMap(map);
+
     // Frontend
     std::shared_ptr<trialSlam::Frontend> frontend(new trialSlam::Frontend());
     frontend -> setCamera(camera);
+    frontend -> setDashboard(dashboard);
     frontend -> setMap(map);
     frontend -> _fd_quality_level = trialSlam::Config::get<double>("detector.qualitylevel");
     frontend -> _fd_min_distance = trialSlam::Config::get<double>("detector.mindistance");

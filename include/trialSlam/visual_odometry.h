@@ -5,6 +5,7 @@
 #include "trialSlam/common.h"
 #include "trialSlam/camera.h"
 #include "trialSlam/frontend.h"
+#include "trialSlam/dashboard.h"
 
 TRIAL_SLAM_NAMESPACE_BEGIN
 
