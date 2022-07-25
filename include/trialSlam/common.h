@@ -23,6 +23,7 @@
 #include <sophus/so3.hpp>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc_c.h>
 

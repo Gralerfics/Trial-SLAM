@@ -40,9 +40,15 @@ class Camera {
 
         void setCameraIndex(int camera_index) { _camera_index = camera_index; }
 
-        Mat3x3 getK() const {
+        Mat3x3 getK_Eigen() const {
             Mat3x3 _K;
             _K << _fx, 0, _cx, 0, _fy, _cy, 0, 0, 1;
+            return _K;
+        }
+
+        cv::Mat getK_CV() const {
+            cv::Mat _K;
+            cv::eigen2cv(getK_Eigen(), _K);
             return _K;
         }
 

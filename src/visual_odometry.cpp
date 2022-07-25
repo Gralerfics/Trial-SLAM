@@ -31,6 +31,7 @@ void VisualOdometry::execute() {
         
         if (cv::waitKey(1) == 27) break;
     }
+    
     stop();
 }
 

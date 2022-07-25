@@ -48,7 +48,7 @@ void Frontend::initTrackFirst() {
         if (cv::waitKey(1) != 13) return;
 
     _init_frame = _cur_frame;
-    
+
     int _num_extracted = extractFrameFeatures(_init_frame);
     std::cout << "Extracted: " << _num_extracted << std::endl;
     if (_num_extracted < _num_features_for_init) return;
@@ -96,7 +96,7 @@ void Frontend::initTrackSecond() {
 }
 
 void Frontend::track() {
-
+    
 }
 
 void Frontend::reset() {
@@ -150,7 +150,70 @@ int Frontend::trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_fram
 }
 
 bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
-    
+    std::vector<cv::Point2f> _pts_1, _pts_2; // P_uv
+    std::vector<cv::Point2f> _pts_1_c, _pts_2_c; // P_c
+    std::vector<int> _feature_index;
+    for (int i = 0; i < frame_first -> getFeaturesRef().size(); i ++) {
+        if (_cur_frame -> getFeaturesRef()[i] != nullptr) {
+            cv::Point2f _pt_1 = frame_first -> getFeaturesRef()[i] -> getKeyPoint().pt;
+            cv::Point2f _pt_2 = frame_second -> getFeaturesRef()[i] -> getKeyPoint().pt;
+            _pts_1.push_back(_pt_1);
+            _pts_2.push_back(_pt_2);
+            Vec3 _pt_1_c = _camera -> pixel2camera(Vec2(_pt_1.x, _pt_1.y));
+            Vec3 _pt_2_c = _camera -> pixel2camera(Vec2(_pt_2.x, _pt_2.y));
+            _pts_1_c.push_back(cv::Point2f(_pt_1_c.x(), _pt_1_c.y()));
+            _pts_2_c.push_back(cv::Point2f(_pt_2_c.x(), _pt_2_c.y()));
+            _feature_index.push_back(i);
+        }
+    }
+
+    cv::Mat R, t;
+    cv::Mat _essential_matrix = cv::findEssentialMat(_pts_1, _pts_2, _camera -> getK_CV(), cv::RANSAC);
+    cv::recoverPose(_essential_matrix, _pts_1, _pts_2, _camera -> getK_CV(), R, t);
+
+    Mat3x3 R_Eigen;
+    Vec3 t_Eigen;
+    cv::cv2eigen(R, R_Eigen);
+    cv::cv2eigen(t, t_Eigen);
+    frame_first -> setTcw(SE3(Mat3x3::Identity(), Vec3::Zero()));
+    frame_second -> setTcw(SE3(R_Eigen, t_Eigen));
+
+    cv::Mat T_1 = (cv::Mat_<float>(3, 4) <<
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0
+    );
+    cv::Mat T_2 = (cv::Mat_<float>(3, 4) <<
+        R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), t.at<double>(0, 0),
+        R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2), t.at<double>(1, 0),
+        R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), t.at<double>(2, 0)
+    );
+
+    cv::Mat _pts_hc;
+    cv::triangulatePoints(T_1, T_2, _pts_1_c, _pts_2_c, _pts_hc);
+    for (int i = 0; i < _pts_hc.cols; i ++) {
+        cv::Mat _p_hc = _pts_hc.col(i);
+        _p_hc /= _p_hc.at<float>(3, 0);
+        // because T_1 = Zero, p_w = p_c_1
+        Vec3 p_w(_p_hc.at<float>(0, 0), _p_hc.at<float>(1, 0), _p_hc.at<float>(2, 0));
+
+        if (p_w.z() > 0) {
+            Landmark::Ptr landmark = Landmark::Create();
+            landmark -> setPosition(p_w);
+            landmark -> addObservedBy(frame_first -> getFeaturesRef()[_feature_index[i]]);
+            landmark -> addObservedBy(frame_second -> getFeaturesRef()[_feature_index[i]]);
+            frame_first -> getFeaturesRef()[_feature_index[i]] -> setLandmark(landmark);
+            frame_second -> getFeaturesRef()[_feature_index[i]] -> setLandmark(landmark);
+            _map -> addLandmark(landmark);
+        }
+    }
+
+    frame_first -> markAsKeyFrame();
+    frame_second -> markAsKeyFrame();
+    _map -> addKeyFrame(frame_first);
+    _map -> addKeyFrame(frame_second);
+    // TODO: Backend update
+
     return true;
 }
 
