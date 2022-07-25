@@ -45,44 +45,51 @@ bool Frontend::addFrame(Frame::Ptr frame) {
     return true;
 }
 
+// Temporary Dashboard
+    static bool _showed_message = false;
+
 void Frontend::initTrackFirst() {
     // Temporary Dashboard
-        std::cout << "The initial pose (Press enter after finished) ..." << std::endl;
+        if (!_showed_message) std::cout << "The initial pose (Press enter after finished) ..." << std::endl;
+        _showed_message = true;
         if (cv::waitKey(1) != 13) return;
+        _showed_message = false;
 
-    _init_frame = _cur_frame;
+    _last_keyframe = _cur_frame;
 
-    int _num_extracted = extractFrameFeatures(_init_frame);
+    int _num_extracted = extractFrameFeatures(_last_keyframe);
     std::cout << "Extracted: " << _num_extracted << std::endl;
-    if (_num_extracted < _num_features_for_init) return;
+    if (_num_extracted < _num_features_for_initializing) return;
 
     _status = FrontendStatus::INIT_TRACK_SECOND;
 }
 
 void Frontend::initTrackSecond() {
     // Temporary Dashboard
-        std::cout << "The corresponding pose (Press enter after finished) ..." << std::endl;
+        if (!_showed_message) std::cout << "The corresponding pose (Press enter after finished) ..." << std::endl;
+        _showed_message = true;
         if (cv::waitKey(1) != 13) return;
+        _showed_message = false;
 
-    int _num_effective = trackFrameFeaturesFromTo(_init_frame, _cur_frame);
+    int _num_effective = trackFrameFeaturesFromTo(_last_keyframe, _cur_frame);
     std::cout << "Successfully tracked: " << _num_effective << std::endl;
-    if (_num_effective < _num_features_for_init) return;
+    if (_num_effective < _num_features_for_initializing) return;
 
     // Temporary Dashboard
         // cv::Mat _tmp;
         // std::vector<cv::DMatch> _matches;
         // std::vector<cv::KeyPoint> _pts_1, _pts_2;
         // int _match_cnt = 0;
-        // for (int i = 0; i < _init_frame -> getFeaturesRef().size(); i ++) {
+        // for (int i = 0; i < _last_keyframe -> getFeaturesRef().size(); i ++) {
         //     if (_cur_frame -> getFeaturesRef()[i] != nullptr) {
         //         _matches.push_back(cv::DMatch(_match_cnt, _match_cnt, 0));
-        //         _pts_1.push_back(_init_frame -> getFeaturesRef()[i] -> getKeyPoint());
+        //         _pts_1.push_back(_last_keyframe -> getFeaturesRef()[i] -> getKeyPoint());
         //         _pts_2.push_back(_cur_frame -> getFeaturesRef()[i] -> getKeyPoint());
         //         _match_cnt ++;
         //     }
         // }
         // cv::drawMatches(
-        //     _init_frame -> _img_raw, _pts_1,
+        //     _last_keyframe -> _img_raw, _pts_1,
         //     _cur_frame -> _img_raw, _pts_2,
         //     _matches, _tmp
         // );
@@ -90,7 +97,7 @@ void Frontend::initTrackSecond() {
         // cv::waitKey(0);
         // cv::destroyWindow("Initial Matches");
 
-    if (buildMapByInit(_init_frame, _cur_frame)) {
+    if (buildMapByEpipolarAndTriangulation(_last_keyframe, _cur_frame)) {
         _status = FrontendStatus::TRACKING;
         if (_dashboard) {
             _dashboard -> setCurrentFrame(_cur_frame);
@@ -102,14 +109,35 @@ void Frontend::initTrackSecond() {
 }
 
 void Frontend::track() {
-    _cur_frame -> setTcw(_last_frame -> getTcw()); // for test.
+    // TODO: initial guess
+
+    int _num_effective = trackFrameFeaturesFromTo(_last_frame, _cur_frame);
+    if (_num_effective < _num_features_for_tracking) {
+        _status = FrontendStatus::LOST;
+        return;
+    }
+
+    int _num_included = estimatePosePnP(_cur_frame);
+    if (_num_included < _num_features_for_tracking) {
+        _status = FrontendStatus::LOST;
+        return;
+    }
+
+    _last_frame -> getFeaturesRef().clear();
+    
+    // landmarks for pose estimation decrease to a low level
+    if (_num_included <= _num_features_for_keyframe) {
+        addFrameAsKeyFrame(_cur_frame);
+    }
 
     if (_dashboard)
         _dashboard -> setCurrentFrame(_cur_frame);
 }
 
 void Frontend::reset() {
-    // TODO
+    // TODO: monocamera troubles ...
+    std::cout << "Track lost. Reseting ..." << std::endl;
+    _status = FrontendStatus::INIT_TRACK_FIRST;
 }
 
 int Frontend::extractFrameFeatures(Frame::Ptr cur_frame) {
@@ -134,8 +162,15 @@ int Frontend::extractFrameFeatures(Frame::Ptr cur_frame) {
 int Frontend::trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_frame) {
     // TODO: Initial guess
     std::vector<cv::Point2f> _pts_ref, _pts_cur;
-    for (auto& keypoint : ref_frame -> getFeaturesRef())
-        _pts_ref.push_back(keypoint -> getKeyPoint().pt);
+    std::vector<unsigned long> _feature_index;
+    unsigned long _i = 0;
+    for (auto& feature : ref_frame -> getFeaturesRef()) {
+        if (feature) {
+            _pts_ref.push_back(feature -> getKeyPoint().pt);
+            _feature_index.push_back(_i);
+        }
+        _i ++;
+    }
     
     std::vector<uchar> status;
     std::vector<float> error;
@@ -150,6 +185,8 @@ int Frontend::trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_fram
         Feature::Ptr feature = nullptr;
         if (status[i]) {
             feature = std::make_shared<Feature>(cur_frame, cv::KeyPoint(_pts_cur[i], 6));
+            Landmark::Ptr landmark = ref_frame -> getFeaturesRef()[_feature_index[i]] -> getLandmark().lock();
+            if (landmark) feature -> setLandmark(landmark);
             _cnt ++;
         }
         cur_frame -> getFeaturesRef().push_back(feature);
@@ -158,11 +195,11 @@ int Frontend::trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_fram
     return _cnt;
 }
 
-bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
+bool Frontend::buildMapByEpipolarAndTriangulation(Frame::Ptr frame_first, Frame::Ptr frame_second) {
     std::vector<cv::Point2f> _pts_1, _pts_2; // P_uv
     std::vector<cv::Point2f> _pts_1_c, _pts_2_c; // P_c
-    std::vector<int> _feature_index;
-    for (int i = 0; i < frame_first -> getFeaturesRef().size(); i ++) {
+    std::vector<unsigned long> _feature_index;
+    for (unsigned long i = 0; i < frame_first -> getFeaturesRef().size(); i ++) {
         if (_cur_frame -> getFeaturesRef()[i] != nullptr) {
             cv::Point2f _pt_1 = frame_first -> getFeaturesRef()[i] -> getKeyPoint().pt;
             cv::Point2f _pt_2 = frame_second -> getFeaturesRef()[i] -> getKeyPoint().pt;
@@ -175,7 +212,7 @@ bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
             _feature_index.push_back(i);
         }
     }
-
+    
     cv::Mat R, t;
     cv::Mat _essential_matrix = cv::findEssentialMat(_pts_1, _pts_2, _camera -> getK_CV(), cv::RANSAC);
     cv::recoverPose(_essential_matrix, _pts_1, _pts_2, _camera -> getK_CV(), R, t);
@@ -187,10 +224,16 @@ bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
     frame_first -> setTcw(SE3(Mat3x3::Identity(), Vec3::Zero()));
     frame_second -> setTcw(SE3(R_Eigen, t_Eigen));
 
+    Mat4x4 _T_1 = frame_first -> getTcw().matrix();
+    // cv::Mat T_1 = (cv::Mat_<float>(3, 4) <<
+    //     1, 0, 0, 0,
+    //     0, 1, 0, 0,
+    //     0, 0, 1, 0
+    // );
     cv::Mat T_1 = (cv::Mat_<float>(3, 4) <<
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0
+        _T_1(0, 0), _T_1(0, 1), _T_1(0, 2), _T_1(0, 3),
+        _T_1(1, 0), _T_1(1, 1), _T_1(1, 2), _T_1(1, 3),
+        _T_1(2, 0), _T_1(2, 1), _T_1(2, 2), _T_1(2, 3)
     );
     cv::Mat T_2 = (cv::Mat_<float>(3, 4) <<
         R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), t.at<double>(0, 0),
@@ -198,13 +241,12 @@ bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
         R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), t.at<double>(2, 0)
     );
 
-    cv::Mat _pts_hc;
-    cv::triangulatePoints(T_1, T_2, _pts_1_c, _pts_2_c, _pts_hc);
-    for (int i = 0; i < _pts_hc.cols; i ++) {
-        cv::Mat _p_hc = _pts_hc.col(i);
-        _p_hc /= _p_hc.at<float>(3, 0);
-        // because T_1 = Zero, p_w = p_c_1
-        Vec3 p_w(_p_hc.at<float>(0, 0), _p_hc.at<float>(1, 0), _p_hc.at<float>(2, 0));
+    cv::Mat _pts_hw;
+    cv::triangulatePoints(T_1, T_2, _pts_1_c, _pts_2_c, _pts_hw);
+    for (int i = 0; i < _pts_hw.cols; i ++) {
+        cv::Mat _p_hw = _pts_hw.col(i);
+        _p_hw /= _p_hw.at<float>(3, 0);
+        Vec3 p_w(_p_hw.at<float>(0, 0), _p_hw.at<float>(1, 0), _p_hw.at<float>(2, 0));
 
         if (p_w.z() > 0) {
             Landmark::Ptr landmark = Landmark::Create();
@@ -224,6 +266,88 @@ bool Frontend::buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second) {
     // TODO: Backend update
 
     return true;
+}
+
+bool Frontend::addFrameAsKeyFrame(Frame::Ptr cur_frame) {
+
+    return true;
+}
+
+int Frontend::estimatePosePnP(Frame::Ptr cur_frame) {
+    typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 3>> BlockSolverType;
+    typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;
+    auto solver = new g2o::OptimizationAlgorithmLevenberg(
+        g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+    g2o::SparseOptimizer optimizer;
+    optimizer.setAlgorithm(solver);
+
+    // Vertex
+    poseVertex* vertex_p = new poseVertex();
+    vertex_p -> setId(0);
+    vertex_p -> setEstimate(cur_frame -> getTcw());
+    optimizer.addVertex(vertex_p);
+
+    // Edge
+    int edge_index = 1;
+    std::vector<projectionPoseEdge*> edges;
+    std::vector<Feature::Ptr> features;
+    for (unsigned long i = 0; i < cur_frame -> getFeaturesRef().size(); i ++) {
+        auto feature = cur_frame -> getFeaturesRef()[i];
+        if (!feature) continue;
+        auto landmark = feature -> getLandmark().lock();
+        if (!landmark) continue;
+        features.push_back(cur_frame -> getFeaturesRef()[i]);
+        projectionPoseEdge* edge = new projectionPoseEdge(landmark -> getPosition(), _camera -> getK_Eigen());
+        edge -> setId(edge_index);
+        edge_index ++;
+        edge -> setVertex(0, vertex_p);
+        edge -> setMeasurement(Vec2(feature -> getKeyPoint().pt.x, feature -> getKeyPoint().pt.y));
+        edge -> setInformation(Mat2x2::Identity());
+        edge -> setRobustKernel(new g2o::RobustKernelHuber());
+        edges.push_back(edge);
+        optimizer.addEdge(edge);
+    }
+
+    // adjust the distribution
+    const double khi2_thresold = 5.991;
+    int _cnt_excluded;
+    for (int it = 0; it < 4; it ++) {
+        vertex_p -> setEstimate(cur_frame -> getTcw());
+        optimizer.initializeOptimization();
+        optimizer.optimize(10);
+        _cnt_excluded = 0;
+
+        for (unsigned long i = 0; i < edges.size(); i ++) {
+            auto edge = edges[i];
+            if (features[i] -> isExcluded()) edge -> computeError();
+            if (edge -> chi2() > khi2_thresold) {
+                features[i] -> exclude();
+                edge -> setLevel(1);
+                _cnt_excluded ++;
+            } else {
+                features[i] -> include();
+                edge -> setLevel(0);
+            }
+
+            if (it == 2) {
+                edge -> setRobustKernel(nullptr);
+            }
+        }
+    }
+
+    // update pose
+    cur_frame -> setTcw(vertex_p -> estimate());
+
+    // update features
+    for (auto& feature : features) {
+        if (feature -> isExcluded()) {
+            feature -> getLandmark().reset();
+            feature -> include(); // ?
+        }
+    }
+
+    return features.size() - _cnt_excluded;
+    // return 0;
 }
 
 TRIAL_SLAM_NAMESPACE_END

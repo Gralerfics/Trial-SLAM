@@ -20,7 +20,8 @@ detector.qualitylevel: 0.01
 detector.mindistance: 10
 featnum: 200
 featnum.init: 100
-featnum.keyframe: 75
+featnum.track: 50
+featnum.keyframe: 80
 
 # Frame
 framenum.active: 6

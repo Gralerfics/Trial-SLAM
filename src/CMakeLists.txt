@@ -5,6 +5,7 @@ add_library(TrialSLAM SHARED
     feature.cpp
     frame.cpp
     frontend.cpp
+    g2olib.cpp
     landmark.cpp
     map.cpp
     visual_odometry.cpp

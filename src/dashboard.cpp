@@ -34,7 +34,7 @@ void Dashboard::loop() {
 
     while (!pangolin::ShouldQuit() && _dashboard_running) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         vis_display.Activate(vis_camera);
 
         std::unique_lock<std::mutex> ulock(_mutex);
@@ -75,7 +75,7 @@ void Dashboard::drawFrame(Frame::Ptr frame, const float* color) {
 
     glColor3f(color[0], color[1], color[2]);
 
-    glLineWidth(2);
+    glLineWidth(1);
     glBegin(GL_LINES);
         glVertex3f(0, 0, 0);
         glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
@@ -108,7 +108,7 @@ void Dashboard::drawLandmarks() {
     for (auto& keyframe : _active_keyframes)
         drawFrame(keyframe.second, COLOR_FRAME);
 
-    glPointSize(2);
+    glPointSize(3);
     glBegin(GL_POINTS);
         for (auto& landmark : _active_landmarks) {
             auto position = landmark.second -> getPosition();

@@ -5,6 +5,7 @@
 #include "trialSlam/common.h"
 #include "trialSlam/camera.h"
 #include "trialSlam/frame.h"
+#include "trialSlam/g2olib.h"
 #include "trialSlam/dashboard.h"
 #include "trialSlam/map.h"
 
@@ -42,11 +43,11 @@ class Frontend {
 
         int trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_frame);
 
-        bool buildMapByInit(Frame::Ptr frame_first, Frame::Ptr frame_second);
+        bool buildMapByEpipolarAndTriangulation(Frame::Ptr frame_first, Frame::Ptr frame_second);
 
-        // bool addCurAsKeyFrame();
+        bool addFrameAsKeyFrame(Frame::Ptr cur_frame);
 
-        // void estimateCurPose();
+        int estimatePosePnP(Frame::Ptr cur_frame);
 
         Camera::Ptr getCamera() const { return _camera; }
 
@@ -59,7 +60,7 @@ class Frontend {
     private:
         Camera::Ptr _camera = nullptr;
         Frame::Ptr _cur_frame = nullptr, _last_frame = nullptr;
-        Frame::Ptr _init_frame = nullptr;
+        Frame::Ptr _last_keyframe = nullptr;
         Dashboard::Ptr _dashboard = nullptr;
         Map::Ptr _map = nullptr;
         FrontendStatus _status = FrontendStatus::INIT_TRACK_FIRST;
@@ -69,7 +70,8 @@ class Frontend {
         double _fd_quality_level = 0.01;
         double _fd_min_distance = 20;
         int _num_features = 150;
-        int _num_features_for_init = 80;
+        int _num_features_for_initializing = 80;
+        int _num_features_for_tracking = 50;
         int _num_features_for_keyframe = 60;
 };
 

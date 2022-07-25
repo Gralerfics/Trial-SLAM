@@ -4,7 +4,7 @@ project(TrialSLAM)
 enable_testing()
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "-O3 -std=c++20 -fopenmp -pthread")
+set(CMAKE_CXX_FLAGS "-O3 -std=c++11 -fopenmp -pthread")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

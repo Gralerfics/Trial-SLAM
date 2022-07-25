@@ -44,6 +44,10 @@ class Feature {
             _keypoint = keypoint;
         }
 
+        bool isExcluded() {
+            return _excluded;
+        }
+
         void exclude() {
             _excluded = true;
         }
