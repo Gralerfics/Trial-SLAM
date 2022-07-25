@@ -2,6 +2,8 @@
 
 # Camera Intrinsics
 cam0.index: 2
+cam0.width: 640
+cam0.height: 480
 cam0.fx: 816.011676
 cam0.fy: 811.145514
 cam0.cx: 349.590470

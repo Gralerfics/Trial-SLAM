@@ -15,10 +15,10 @@ class Camera {
 
         Camera(double fx, double fy, double cx, double cy,
                double k1, double k2, double k3, double p1, double p2,
-               int camera_index = 0)
+               int camera_index = 0, int width = 640, int height = 480)
             : _fx(fx), _fy(fy), _cx(cx), _cy(cy),
             _k1(k1), _k2(k2), _k3(k3), _p1(p1), _p2(p2),
-            _camera_index(camera_index) {}
+            _camera_index(camera_index), _width(width), _height(height) {}
 
         Vec3 world2camera(const Vec3& p_w, const SE3& T_cw) const;
 
@@ -56,9 +56,10 @@ class Camera {
 
         friend std::ostream& operator <<(std::ostream& output, const Camera& camera);
 
-    private:
+    public:
         double _fx = 0, _fy = 0, _cx = 0, _cy = 0;
         double _k1 = 0, _k2 = 0, _k3 = 0, _p1 = 0, _p2 = 0;
+        int _width = 640, _height = 480;
         int _camera_index = 0;
 
         std::shared_ptr<cv::VideoCapture> _capture = nullptr;
