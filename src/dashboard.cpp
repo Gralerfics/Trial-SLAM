@@ -20,8 +20,9 @@ void Dashboard::loop() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // TOFIX: uncertain parameters
     pangolin::OpenGlRenderState vis_camera(
-        pangolin::ProjectionMatrix(DASHBOARD_WIDTH, DASHBOARD_HEIGHT, 400, 400, 512, 384, 0.1, 1000),
+        pangolin::ProjectionMatrix(DASHBOARD_WIDTH, DASHBOARD_HEIGHT, 400, 400, DASHBOARD_WIDTH / 2, DASHBOARD_HEIGHT / 2, 0.1, 1000),
         pangolin::ModelViewLookAt(0, -5, -10, 0, 0, 0, 0.0, -1.0, 0.0)
     );
 
@@ -46,7 +47,8 @@ void Dashboard::loop() {
 
         if (_map) drawLandmarks();
 
-        usleep(5000);
+        pangolin::FinishFrame();
+        usleep(1000);
     }
 }
 

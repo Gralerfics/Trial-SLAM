@@ -102,7 +102,7 @@ void Frontend::initTrackSecond() {
 }
 
 void Frontend::track() {
-    
+    _cur_frame -> setTcw(_last_frame -> getTcw()); // for test.
 
     if (_dashboard)
         _dashboard -> setCurrentFrame(_cur_frame);
