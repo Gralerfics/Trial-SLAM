@@ -5,8 +5,7 @@ TRIAL_SLAM_NAMESPACE_BEGIN
 bool Frontend::initialize() {
     _status = FrontendStatus::INIT_TRACK_FIRST;
 
-    _features_detector = cv::SiftFeatureDetector::create(_num_features);
-    // _features_detector = cv::GFTTDetector::create(_num_features, _fd_quality_level, _fd_min_distance);
+    _features_detector = cv::GFTTDetector::create(_num_features, _fd_quality_level, _fd_min_distance);
 
     if (_camera == nullptr || _map == nullptr) return false;
 
@@ -379,7 +378,7 @@ struct SnavelyReprojectionError {
 };
 
 int Frontend::estimatePosePnP(Frame::Ptr cur_frame) {
-/*
+// /*
     std::vector<cv::Point3f> pts_3d;
     std::vector<cv::Point2f> pts_2d;
     int _cnt = 0;
@@ -427,9 +426,9 @@ int Frontend::estimatePosePnP(Frame::Ptr cur_frame) {
     cur_frame -> setTcw(SE3(R_Eigen, t_Eigen));
 
     return _cnt;
-*/
+// */
 
-// /*
+/*
     std::vector<cv::Point3f> pts_3d;
     std::vector<cv::Point2f> pts_2d;
     int _cnt = 0;
@@ -456,7 +455,7 @@ int Frontend::estimatePosePnP(Frame::Ptr cur_frame) {
     cur_frame -> setTcw(SE3(R_Eigen, t_Eigen));
 
     return _cnt;
-// */
+*/
 
 /*
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 3>> BlockSolverType;
