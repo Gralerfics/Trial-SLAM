@@ -15,7 +15,8 @@ enum class FrontendStatus {
     INIT_TRACK_FIRST,
     INIT_TRACK_SECOND,
     TRACKING,
-    LOST
+    LOST,
+    SHUTDOWN
 };
 
 class Frontend {
@@ -43,7 +44,7 @@ class Frontend {
 
         int trackFrameFeaturesFromTo(Frame::Ptr ref_frame, Frame::Ptr cur_frame);
 
-        bool buildMapByEpipolarAndTriangulation(Frame::Ptr frame_first, Frame::Ptr frame_second);
+        bool buildMapByEpipolarAndTriangulation(Frame::Ptr frame_first, Frame::Ptr frame_second, bool isT2Known);
 
         bool addFrameAsKeyFrame(Frame::Ptr cur_frame);
 
@@ -67,6 +68,7 @@ class Frontend {
 
     public:
         cv::Ptr<cv::GFTTDetector> _features_detector;
+        SE3 _relative_move;
         double _fd_quality_level = 0.01;
         double _fd_min_distance = 20;
         int _num_features = 150;

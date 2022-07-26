@@ -41,6 +41,9 @@ typedef Sophus::SO3d SO3;
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc_c.h>
 
+#include <ceres/ceres.h>
+#include <ceres/rotation.h>
+
 #include <glog/logging.h>
 
 TRIAL_SLAM_NAMESPACE_BEGIN

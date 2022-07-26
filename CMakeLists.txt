@@ -29,6 +29,10 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 find_package(Sophus REQUIRED)
 include_directories(${Sophus_INCLUDE_DIRS})
 
+# Ceres
+find_package(Ceres REQUIRED)
+include_directories(${CERES_INCLUDE_DIRS})
+
 # g2o
 find_package(G2O REQUIRED)
 include_directories(${G2O_INCLUDE_DIRS})
@@ -53,6 +57,7 @@ set(THIRD_PARTY_LIBS
     ${OpenCV_LIBS}
     ${Sophus_LIBRARIES}
     ${Pangolin_LIBRARIES} GL GLU GLEW glut
+    ${CERES_LIBRARIES}
     g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
     ${GTEST_BOTH_LIBRARIES}
     ${GLOG_LIBRARIES}

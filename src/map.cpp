@@ -3,6 +3,7 @@
 TRIAL_SLAM_NAMESPACE_BEGIN
 
 void Map::addKeyFrame(Frame::Ptr frame) {
+    std::unique_lock<std::mutex> ulock(_mutex);
     // if (_keyframes.find(frame -> getKeyFrameId()) == _keyframes.end()) {
         _keyframes.insert(std::make_pair(frame -> getKeyFrameId(), frame));
         _active_keyframes.insert(std::make_pair(frame -> getKeyFrameId(), frame));
@@ -10,12 +11,13 @@ void Map::addKeyFrame(Frame::Ptr frame) {
     //     _keyframes[frame -> getKeyFrameId()] = frame;
     //     _active_keyframes[frame -> getKeyFrameId()] = frame;
     // }
-    
+
     if (_active_keyframes.size() > _num_active_keyframes)
         filterActiveKeyFrame(frame, 0.2);
 }
 
 void Map::addLandmark(Landmark::Ptr landmark) {
+    std::unique_lock<std::mutex> ulock(_mutex);
     // if (_landmarks.find(landmark -> getId()) == _landmarks.end()) {
         _landmarks.insert(std::make_pair(landmark -> getId(), landmark));
         _active_landmarks.insert(std::make_pair(landmark -> getId(), landmark));
@@ -54,7 +56,9 @@ void Map::filterActiveKeyFrame(Frame::Ptr ref_frame, double dist_thresold) {
     }
 
     Frame::Ptr rm_frame = _keyframes.at(min_dist < dist_thresold ? min_index : max_index);
+    _active_keyframes.erase(rm_frame -> getKeyFrameId());
     for (Feature::Ptr feature : rm_frame -> getFeaturesRef()) {
+        if (!feature) continue;
         if (feature -> getLandmark().lock()) {
             feature -> getLandmark().lock() -> removeObservedBy(feature);
         }

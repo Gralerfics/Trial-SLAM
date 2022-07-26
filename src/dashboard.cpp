@@ -48,7 +48,7 @@ void Dashboard::loop() {
         if (_map) drawLandmarks();
 
         pangolin::FinishFrame();
-        usleep(1000);
+        usleep(5000);
     }
 }
 
