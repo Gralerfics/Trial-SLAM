@@ -307,7 +307,7 @@ bool Frontend::buildMapByEpipolarAndTriangulation(Frame::Ptr frame_first, Frame:
 
 bool Frontend::addFrameAsKeyFrame(Frame::Ptr cur_frame) {
     std::cout << "Adding new keyframe ..." << std::endl;
-    Frame::Ptr ref_frame = _last_keyframe;
+    Frame::Ptr ref_frame = _last_frame;
 
     // extract new features
     ref_frame -> getFeaturesRef().clear(); // temporary solution, TODO: DMatch
